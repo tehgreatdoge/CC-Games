@@ -23,16 +23,7 @@ function a()
         if GameStarted == true then
             monitor.setBackgroundColor(colors.blue)
         monitor.clear()
-        monitor.setTextScale(4)
-        if playersturn == "W" then  
-            monitor.setTextColor(colors.green)
-            monitor.setCursorPos(9,8)
-            monitor.write("{}")
-        elseif playersturn == "B" then
-            monitor.setTextColor(colors.green)
-            monitor.setCursorPos(9,1)
-            monitor.write("{}")
-        end
+        monitor.setTextScale(5)
         monitor.setCursorPos(1,1)
         for index, value in pairs(pieceLayout) do
             monitor.setCursorPos(value.x,value.y)
