@@ -10,12 +10,18 @@ end
     
     
 local speaker = peripheral.find("speaker")
+local redstoneIntegrator = peripheral.find("redstoneIntegrator")
 local playersturn = "W"
 local selectedpiece = ""
+local GameStarted = false
+local Config = {}
+Config.Shield = true
+Config.Sound = true
 function a()
     --display
     while true do
-        monitor.setBackgroundColor(colors.blue)
+        if GameStarted == true then
+            monitor.setBackgroundColor(colors.blue)
         monitor.clear()
         monitor.setTextScale(4)
         if playersturn == "W" then  
@@ -103,6 +109,16 @@ function a()
             end
         end
         
+        else
+            monitor.clear()
+            monitor.setTextScale(2)
+            monitor.setCursorPos(3,8)
+            monitor.setTextColor(colors.red)
+            monitor.setBackgroundColor(colors.black)
+            monitor.write("Waiting To Start")
+
+        end
+        
         sleep(.1)
     end
 end
@@ -110,7 +126,8 @@ local Moves = {}
 function b()
     --reciving
     while true do
-        local event, side, x, y = os.pullEvent("monitor_touch") 
+        if GameStarted == true then
+            local event, side, x, y = os.pullEvent("monitor_touch") 
         print("Monitor Touched At (" .. x .. ", " .. y .. ")")
         local SavedValues = {}
         SavedValues.originalSpaceX = x
@@ -148,7 +165,7 @@ function b()
                             if valuel.pieceName ~= "none" then
                                 valuel.pieceName = "none"
                                 valuel.init = 0
-                                if speaker then
+                                if speaker and Config.Sound == true then
                                     speaker.playSound("entity.generic.explode",.5)
                                 end
                             end
@@ -169,7 +186,10 @@ function b()
                 end
             end
         end
+        end
+        sleep(.1)
     end
+        
 end    
 function c()
     local bools = true
@@ -206,8 +226,72 @@ function c()
         else
 
         end
+        sleep(.5)
+    end
+end
+function d()
+    --shield
+    while true do
+        if GameStarted == true and Config.Shield == true then
+            redstoneIntegrator.setOutput("front",true)
+        else
+            redstoneIntegrator.setOutput("front",false)
+        end
         sleep(.1)
     end
 end
-parallel.waitForAll(a,b,c)
+
+function e()
+    while true do
+        if GameStarted == false then
+            term.clear()
+        term.setCursorPos(1,1)
+        print("Game Menu:\n  1 = Start Game\n  2 = Config")
+        local promt = read()
+        if promt == "1" then
+            term.clear()
+            term.setCursorPos(1,1)
+            print("Game Starting")
+            GameStarted = true
+            print("Game Running")
+        elseif promt == "2" then
+            term.clear()
+            term.setCursorPos(1,1)
+            print("Config: \n  1 = Shield: "..tostring(Config.Shield).."\n  2 = Sound: "..tostring(Config.Sound))
+            local promt2 = read()
+            if promt2 == "1" then
+                term.clear()
+                term.setCursorPos(1,1)
+                print("Shield:\n (true/false)")
+                local promt3 = read()
+                if promt3 == "true" then
+                    Config.Shield = true
+                    print("Config Changed")
+                    sleep(.5)
+                elseif promt3 == "false" then
+                    Config.Shield = false
+                    print("Config Changed")
+                    sleep(.5)
+                end
+            elseif promt2 == "2" then
+                term.clear()
+                term.setCursorPos(1,1)
+                print("Sound:\n (true/false)")
+                local promt3 = read()
+                if promt3 == "true" then
+                    Config.Sound = true
+                    print("Config Changed")
+                    sleep(.5)
+                elseif promt3 == "false" then
+                    Config.Sound = false
+                    print("Config Changed")
+                    sleep(.5)
+                end
+            end
+        end
+        end
+        sleep(.1)
+    end
+end
+parallel.waitForAll(a,b,c,d,e)
 
