@@ -273,7 +273,7 @@ function e()
         if GameStarted == false then
             term.clear()
         term.setCursorPos(1,1)
-        print("Game Menu:\n  1 = Start Game\n  2 = Config")
+        print("Game Menu:\n  1 = Start Game Beting\n  2 = Start Game For Fun\n  3 = Config")
         local promt = read()
         if promt == "1" then
             term.clear()
@@ -334,8 +334,19 @@ function e()
                 print("Game Running")
             else
                 error("Invaild Balance")
-            end
+            end 
         elseif promt == "2" then
+            term.clear()
+            term.setCursorPos(1,1)
+            print("Game Ready Press Any Button To start")
+            os.pullEvent("key")
+            print("Game Starting")
+            printer.newPage()
+            printOnPrinter("No Bets")
+            GameStarted = true
+            print("Game Running")
+    
+        elseif promt == "3" then
             term.clear()
             term.setCursorPos(1,1)
             print("Config: \n  1 = Shield: "..tostring(Config.Shield).."\n  2 = Sound: "..tostring(Config.Sound).."\n  3 = Timer: "..tostring(Config.Timer).."("..Config.TimerTime..")")
