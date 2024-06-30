@@ -12,6 +12,11 @@ end
 local speaker = peripheral.find("speaker")
 local redstoneIntegrator = peripheral.find("redstoneIntegrator")
 local printer = peripheral.find("printer")
+local WDiskraw = peripheral.wrap("drive_39")
+local BDiskraw = peripheral.wrap("drive_40")
+local WDisk = WDiskraw.getMountPath()
+local BDisk = BDiskraw.getMountPath()
+local Modem = peripheral.find("modem")
 local playersturn = "W"
 local selectedpiece = ""
 local GameStarted = false
@@ -273,10 +278,63 @@ function e()
         if promt == "1" then
             term.clear()
             term.setCursorPos(1,1)
-            print("Game Starting")
-            printer.newPage()
-            GameStarted = true
-            print("Game Running")
+            print("Bet Value:\n  Black")
+            local BetB = tonumber(read())
+            print("  White")
+            local BetW = tonumber(read())
+            print("Pulling Bets")
+            local charges = {}
+            charges.functionCall = "SetCharge"
+            charges.value = BetB
+            Modem.transmit(10, 10, charges)
+            local sender = {}
+            sender.functionCall = "Run"
+            sender.runningFunc = "Exchange"
+            local file = fs.open(fs.combine(BDisk,"Ecard/Data"),"r")
+            local data = textutils.unserialise(file.readAll())
+            file.close()
+            sender.info = {}
+            sender.info.id = data.fulllink
+            Modem.transmit(10, 10, sender)
+            repeat
+                
+                event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
+            until message.functionCall == "Reply" and message.replyType == "Auth"
+            if message.data == true then
+                print("Black's Bet Recived")
+            else
+                error("Invaild Balance")
+            end
+            local charges = {}
+            charges.functionCall = "SetCharge"
+            charges.value = BetW
+            Modem.transmit(10, 10, charges)
+            local sender = {}
+            sender.functionCall = "Run"
+            sender.runningFunc = "Exchange"
+            local file = fs.open(fs.combine(WDisk,"Ecard/Data"),"r")
+            local data = textutils.unserialise(file.readAll())
+            file.close()
+            sender.info = {}
+            sender.info.id = data.fulllink
+            Modem.transmit(10, 10, sender)
+            local event, side, channel, replyChannel, message, distance
+            repeat
+                
+                event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
+            until message.functionCall == "Reply" and message.replyType == "Auth"
+            if message.data == true then
+                print("White's Bet Recived")
+                print("Game Ready Press Any Button To start")
+                os.pullEvent("key")
+                print("Game Starting")
+                printer.newPage()
+                printOnPrinter("Bets: W:"..BetW.." B:"..BetB)
+                GameStarted = true
+                print("Game Running")
+            else
+                error("Invaild Balance")
+            end
         elseif promt == "2" then
             term.clear()
             term.setCursorPos(1,1)
@@ -380,5 +438,11 @@ function f()
         end
     end
 end
+Modem.open(10)
+local value = {}
+
+value.functionCall = "SetMode"
+value.mode = 1
+Modem.transmit(10,10,value)
 parallel.waitForAll(a,b,c,d,e)
 
