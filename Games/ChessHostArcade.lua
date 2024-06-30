@@ -11,12 +11,15 @@ end
     
 local speaker = peripheral.find("speaker")
 local redstoneIntegrator = peripheral.find("redstoneIntegrator")
+local printer = peripheral.find("printer")
 local playersturn = "W"
 local selectedpiece = ""
 local GameStarted = false
 local Config = {}
 Config.Shield = true
 Config.Sound = true
+Config.Timer = false
+Config.TimerTime = 60
 function a()
     --display
     while true do
@@ -113,6 +116,18 @@ function a()
         sleep(.1)
     end
 end
+local line = 1
+function printOnPrinter(data)
+    printer.setCursorPos(1, line)
+    printer.write(data)
+    line = line+1
+    local w,h = printer.getPageSize()
+    if h == line then
+        printer.endPage()
+        line = 1
+        printer.newPage()
+    end
+end
 local Moves = {}
 function b()
     --reciving
@@ -162,6 +177,7 @@ function b()
                             end
 
                             selectedpiece = ""
+                            printOnPrinter(#Moves..": "..value.pieceName.."."..value.color.." | "..SavedValues.originalSpaceX.."/"..SavedValues.originalSpaceY..">"..SavedValues.newSpaceX.."/"..SavedValues.newSpaceY)
                             if playersturn == "W" then
                                 playersturn = "B"
                                 print("Black's Turn")
@@ -175,8 +191,22 @@ function b()
                     end
                     break
                 end
+            elseif value.color ~= playersturn and value.pieceName == "king" then
+                if value.x == x and value.y == y then
+                    print("CheckMate")
+                    printOnPrinter("Checkmate "..playersturn.." Wins")
+                    Moves = {}
+                    printer.endPage()
+                    local file = fs.open("pieceLayout", "r")
+                    pieceLayout = textutils.unserialise(file.readAll())
+                    file.close()
+                    sleep(1)
+                    GameStarted = false
+                end
+                
+                
             end
-        end
+            end
         end
         sleep(.1)
     end
@@ -204,6 +234,7 @@ function c()
                                 playersturn = "W"
                             end
                             print("Rewound")
+                            printOnPrinter("Rewound Move #"..#Moves)
                             break
                         end
                     end
@@ -243,12 +274,13 @@ function e()
             term.clear()
             term.setCursorPos(1,1)
             print("Game Starting")
+            printer.newPage()
             GameStarted = true
             print("Game Running")
         elseif promt == "2" then
             term.clear()
             term.setCursorPos(1,1)
-            print("Config: \n  1 = Shield: "..tostring(Config.Shield).."\n  2 = Sound: "..tostring(Config.Sound))
+            print("Config: \n  1 = Shield: "..tostring(Config.Shield).."\n  2 = Sound: "..tostring(Config.Sound).."\n  3 = Timer: "..tostring(Config.Timer).."("..Config.TimerTime..")")
             local promt2 = read()
             if promt2 == "1" then
                 term.clear()
@@ -278,10 +310,74 @@ function e()
                     print("Config Changed")
                     sleep(.5)
                 end
+            elseif promt2 == "3" then
+                    term.clear()
+                    term.setCursorPos(1,1)
+                    print("Timer:\n (true/false)")
+                    local promt3 = read()
+                    if promt3 == "true" then
+                        Config.Sound = true
+                        print("Time:\n (In Seconds)")
+                        Config.TimerTime = tonumber(read())
+                        print("Config Changed")
+                        sleep(.5)
+                    elseif promt3 == "false" then
+                        Config.Sound = false
+                        print("Config Changed")
+                        sleep(.5)
+                    end
             end
         end
         end
         sleep(.1)
+    end
+end
+function f()
+    while true do
+        local timer = 60
+        if playersturn == "W" then
+            while true do
+                if timer ~= 0 then
+                    if playersturn == "W" then
+                    
+                        sleep(1)
+                        timer = timer-1 
+                    else
+                        break
+                    end
+                else
+                    if playersturn == "W" then
+                        playersturn = "B"
+                        break
+                    elseif playersturn == "B" then
+                        playersturn = "W"
+                        break
+                    end
+                end
+                
+            end
+        elseif playersturn == "B" then
+            while true do
+                if timer ~= 0 then
+                    if playersturn == "B" then
+                    
+                        sleep(1)
+                        timer = timer-1 
+                    else
+                        break
+                    end
+                else
+                    if playersturn == "W" then
+                        playersturn = "B"
+                        break
+                    elseif playersturn == "B" then
+                        playersturn = "W"
+                        break
+                    end
+                end
+                
+            end
+        end
     end
 end
 parallel.waitForAll(a,b,c,d,e)
