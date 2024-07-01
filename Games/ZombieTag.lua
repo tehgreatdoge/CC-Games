@@ -8,13 +8,22 @@ local gameri = peripheral.wrap("redstoneIntegrator_15")
 local gamesp = peripheral.wrap("ae2:spatial_io_port_0")
 local lobbysp = peripheral.wrap("ae2:spatial_io_port_1")
 local swap = peripheral.wrap("minecraft:chest_9")
+local ChatClient = require("ChatClient")
 local GameStarted = false
 local GameStarting = false
 local in_range = {}
 
 local players = {}
 
+
 local Zombies = {}
+function getPlayers()
+    local playersraw = {}
+    for key, value in pairs(players) do
+        playersraw[#playersraw+1] = key
+    end
+    return playersraw
+end
 function changed()
     while true do
         if GameStarted == true then
@@ -24,9 +33,7 @@ function changed()
                     local pl = playerdetector.getPlayerPos(k)
                     if math.sqrt((pl.x-target.x)^2+(pl.y-target.y)^2+(pl.z-target.z)^2)<2 then
                         if not Zombies[k] then
-                            for index, value in pairs(players) do
-                                chatbox.sendMessageToPlayer("Player "..k.." Has Been Infected!!", index)
-                            end
+                            ChatClient.sendMessageToPlayers(getPlayers(), 1,{senderName = "ZombieTag",message = "Player "..k.." Has Been Infected!!",})
                             Zombies[k] = 0
                             Zombies[index] = Zombies[index]+1
                             for key, value in pairs(ims) do
@@ -106,12 +113,11 @@ function Start()
                 print(key)
             end
             local zombie = playersraw[math.random(1,#playersraw)]
-            for index, value in pairs(players) do
-                chatbox.sendMessageToPlayer("Player "..zombie.." The Alpha Zombie!!", index,"Game Master")
-                for key, value in pairs(ims) do
-                    if value.getOwner() == zombie then
-                        value.addItemToPlayer("east", {name="minecraft:golden_chestplate", toSlot=102, count=1})
-                    end
+
+            ChatClient.sendMessageToPlayers(getPlayers(), 1,{senderName = "ZombieTag",message = "Player "..zombie.." The Alpha Zombie!!"})
+            for key, value in pairs(ims) do
+                if value.getOwner() == zombie then
+                    value.addItemToPlayer("east", {name="minecraft:golden_chestplate", toSlot=102, count=1})
                 end
                 sleep(1.1)
             end
@@ -132,10 +138,7 @@ function endgame()
             zombievalue = zombievalue+1
         end
         if playervalue == zombievalue and GameStarted == true then
-            for index, value in pairs(players) do
-                chatbox.sendMessageToPlayer("Game Over Zombies Win",index,"Game Master")
-                sleep(1.1)
-            end
+            ChatClient.sendMessageToPlayers(getPlayers(), 3,{senderName = "ZombieTag",message = "Game Over"})
             for index, value in pairs(Zombies) do
                 for key, valuek in pairs(ims) do
                     if valuek.getOwner() == index then

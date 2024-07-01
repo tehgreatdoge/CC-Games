@@ -207,6 +207,7 @@ function b()
                     file.close()
                     sleep(1)
                     GameStarted = false
+                    playersturn = "W"
                 end
                 
                 
