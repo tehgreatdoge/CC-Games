@@ -450,11 +450,23 @@ function f()
         end
     end
 end
+
+function terminateinfo()
+    while true do
+        local event, key, is_held = os.pullEvent("key")
+        if key == keys.f4 and GameStarted == true then
+            print("Ending Round As Draw")
+            printOnPrinter("Draw")
+            printer.endPage()
+            GameStarted = false
+        end
+    end
+end
 Modem.open(10)
 local value = {}
 
 value.functionCall = "SetMode"
 value.mode = 1
 Modem.transmit(10,10,value)
-parallel.waitForAll(a,b,c,d,e)
+parallel.waitForAll(a,b,c,d,e,terminateinfo)
 
