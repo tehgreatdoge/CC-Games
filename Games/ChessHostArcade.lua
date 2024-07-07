@@ -27,7 +27,6 @@ Config.Shield = true
 Config.Sound = true
 Config.Timer = false
 Config.TimerTime = 60
-Config.ForceMoves = true
 
 function a()
     --display
@@ -183,7 +182,7 @@ function b()
                 end
                 --Get the captured piece position
                 local cx,cy
-                if move.captures then
+                if move.captures  then
                     cx = move.captures.x
                     cy = move.captures.y
                 else
@@ -327,7 +326,7 @@ function e()
             sendmsg.charge = BetW
             sender.message = sendmsg
             rednet.send(575,sender,"PaymentServer")
-            local id, message = rednet.receive()
+            local id, message = rednet.receive("PaymentServer")
             if message.status =="ReplyAuth" and message.ReplyMessage == "Insufficient Funds" then
                 print("Insufficient Chips, White")
                 sleep(1)
@@ -342,7 +341,7 @@ function e()
                 sendmsg.charge = BetB
                 sender.message = sendmsg
                 rednet.send(575,sender,"PaymentServer")
-                local id, message = rednet.receive()
+                local id, message = rednet.receive("PaymentServer")
                 if message.status =="ReplyAuth" and message.ReplyMessage == "Insufficient Funds" then
                     print("Insufficient Chips, Black")
                     local sender = {}
@@ -353,6 +352,7 @@ function e()
                     sendmsg.charge = BetW
                     sender.message = sendmsg
                     rednet.send(575,sender,"PaymentServer")
+                    local id, message = rednet.receive("PaymentServer")
                     if message.status =="ReplyAuth" and message.ReplyMessage == "Accepted Payment" then
                         print("Your Chips Have Been Returned White, Black's Chips Had No change")
                     else
@@ -388,7 +388,7 @@ function e()
         elseif promt == "3" then
             term.clear()
             term.setCursorPos(1,1)
-            print("Config: \n  1 = Shield: "..tostring(Config.Shield).."\n  2 = Sound: "..tostring(Config.Sound).."\n  3 = Timer: "..tostring(Config.Timer).."("..Config.TimerTime..")\n  4 = Move Inforcement: "..tostring(Config.ForceMoves))
+            print("Config: \n  1 = Shield: "..tostring(Config.Shield).."\n  2 = Sound: "..tostring(Config.Sound).."\n  3 = Timer: "..tostring(Config.Timer).."("..Config.TimerTime..")")
             local promt2 = read()
             if promt2 == "1" then
                 term.clear()
@@ -434,23 +434,8 @@ function e()
                         print("Config Changed")
                         sleep(.5)
                     end
-            elseif promt2 == "4" then
-                term.clear()
-                term.setCursorPos(1,1)
-                print("Warning Beting Inforces This")
-                print("Move Inforcement:\n (true/false)")
-                local promt3 = read()
-                if promt3 == "true" then
-                    Config.ForceMoves = true
-                    print("Config Changed")
-                    sleep(.5)
-                elseif promt3 == "false" then
-                    Config.ForceMoves = false
-                    print("Config Changed")
-                    sleep(.5)
                 end
             end
-        end
         end
         sleep(.1)
     end
@@ -513,8 +498,14 @@ function terminateinfo()
         if key == keys.f4 and GameStarted == true then
             print("Ending Round As Draw")
             printOnPrinter("Draw")
+            Moves = {}
             printer.endPage()
+            local file = fs.open("pieceLayout", "r")
+            pieceLayout = textutils.unserialise(file.readAll())
+            file.close()
+            sleep(1)
             GameStarted = false
+            playersturn = "W"
         end
     end
 end
