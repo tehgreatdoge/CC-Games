@@ -1,4 +1,7 @@
-local monitor = peripheral.find("monitor")
+local chessAlgorithm = require("chessAlgorithm")
+
+local gamemonitor = peripheral.wrap("monitor_156")
+local movemonitor = peripheral.wrap("monitor_162")
 local pieceLayout = {}
 if not fs.exists("pieceLayout") then
     print("No Board File Found")
@@ -7,114 +10,55 @@ else
     pieceLayout = textutils.unserialise(file.readAll())
     file.close()
 end
-    
-    
 local speaker = peripheral.find("speaker")
 local redstoneIntegrator = peripheral.find("redstoneIntegrator")
 local printer = peripheral.find("printer")
 local WDiskraw = peripheral.wrap("drive_39")
 local BDiskraw = peripheral.wrap("drive_40")
-local WDisk = WDiskraw.getMountPath()
-local BDisk = BDiskraw.getMountPath()
-local Modem = peripheral.find("modem")
+peripheral.find("modem",rednet.open)
 local playersturn = "W"
 local selectedpiece = ""
+local selectedpieceobj = nil
+local takeablepieces = {}
+local pieceValidMoves ={}
 local GameStarted = false
 local Config = {}
 Config.Shield = true
 Config.Sound = true
 Config.Timer = false
 Config.TimerTime = 60
+Config.ForceMoves = true
+
 function a()
     --display
     while true do
         if GameStarted == true then
-            monitor.setBackgroundColor(colors.blue)
-        monitor.clear()
-        monitor.setTextScale(5)
-        monitor.setCursorPos(1,1)
+            gamemonitor.setBackgroundColor(colors.blue)
+        gamemonitor.clear()
+        gamemonitor.setTextScale(5)
+        gamemonitor.setCursorPos(1,1)
         for index, value in pairs(pieceLayout) do
-            monitor.setCursorPos(value.x,value.y)
-            if value.pieceName == "pawn"then
-                if value.color == "W" then
-                    monitor.setTextColor(colors.lightGray)
-                elseif value.color == "B" then
-                    monitor.setTextColor(colors.black)
-                end
-                if selectedpiece == index then
-                    monitor.setTextColor(colors.purple)
-                end
-                monitor.setCursorPos(value.x,value.y)
-                monitor.write("P")
-            elseif value.pieceName == "rook" then
-                if value.color == "W" then
-                    monitor.setTextColor(colors.lightGray)
-                elseif value.color == "B" then
-                    monitor.setTextColor(colors.black)
-                end
-                if selectedpiece == index then
-                    monitor.setTextColor(colors.purple)
-                end
-                monitor.setCursorPos(value.x,value.y)
-                monitor.write("R")
-            elseif value.pieceName == "knight" then
-                if value.color == "W" then
-                    monitor.setTextColor(colors.lightGray)
-                elseif value.color == "B" then
-                    monitor.setTextColor(colors.black)
-                end
-                if selectedpiece == index then
-                    monitor.setTextColor(colors.purple)
-                end
-                monitor.setCursorPos(value.x,value.y)
-                monitor.write("N")
-            elseif value.pieceName == "bishop" then
-                if value.color == "W" then
-                    monitor.setTextColor(colors.lightGray)
-                elseif value.color == "B" then
-                    monitor.setTextColor(colors.black)
-                end
-                if selectedpiece == index then
-                    monitor.setTextColor(colors.purple)
-                end
-                monitor.setCursorPos(value.x,value.y)
-                monitor.write("B")
-            elseif value.pieceName == "queen" then
-                if value.color == "W" then
-                    monitor.setTextColor(colors.lightGray)
-                elseif value.color == "B" then
-                    monitor.setTextColor(colors.black)
-                end
-                if selectedpiece == index then
-                    monitor.setTextColor(colors.purple)
-                end
-                monitor.setCursorPos(value.x,value.y)
-                monitor.write("Q")
-            elseif value.pieceName == "king" then
-                if value.color == "W" then
-                    monitor.setTextColor(colors.lightGray)
-                elseif value.color == "B" then
-                    monitor.setTextColor(colors.black)
-                end
-                if selectedpiece == index then
-                    monitor.setTextColor(colors.purple)
-                end
-                monitor.setCursorPos(value.x,value.y)
-                monitor.write("K")
-            elseif value.pieceName == "none" then
-                monitor.setTextColor(colors.red)
-                monitor.setCursorPos(value.x,value.y)
-                monitor.write("#")
+            gamemonitor.setCursorPos(value.x,value.y)
+            local c,pi = chessAlgorithm.Identify(value)
+            if selectedpiece == index then
+                gamemonitor.setTextColor(colors.purple)
+            elseif takeablepieces[index] then
+                gamemonitor.setTextColor(colors.blue)
+            elseif pieceValidMoves[index] then
+                gamemonitor.setTextColor(colors.orange)
+            else
+                gamemonitor.setTextColor(c)
             end
+            gamemonitor.write(pi)
         end
         
         else
-            monitor.clear()
-            monitor.setTextScale(2)
-            monitor.setCursorPos(3,8)
-            monitor.setTextColor(colors.red)
-            monitor.setBackgroundColor(colors.black)
-            monitor.write("Waiting To Start")
+            gamemonitor.clear()
+            gamemonitor.setTextScale(2)
+            gamemonitor.setCursorPos(3,8)
+            gamemonitor.setTextColor(colors.red)
+            gamemonitor.setBackgroundColor(colors.black)
+            gamemonitor.write("Waiting To Start")
 
         end
         
@@ -133,7 +77,68 @@ function printOnPrinter(data)
         printer.newPage()
     end
 end
+
 local Moves = {}
+
+movemonitor.setCursorPos(1,1)
+movemonitor.setTextColor(colors.green)
+movemonitor.write("Moves")
+local mline = 1
+function printMove(piece,color,ix,iy,nx,ny)
+    if mline == 1 then
+        movemonitor.setCursorPos(1,1)
+        movemonitor.setTextColor(colors.green)
+        movemonitor.write("Moves")
+        mline = 2
+    end
+    movemonitor.setCursorPos(1,mline)
+    if color == "W" then
+        movemonitor.setTextColor(colors.white)
+    elseif color == "B" then
+        movemonitor.setTextColor(colors.gray)
+    end
+    movemonitor.write(#Moves..": "..piece.." ("..color..") "..chessAlgorithm.trueLocation(ix,iy)..">"..chessAlgorithm.trueLocation(nx,ny))
+    local w,h = movemonitor.getSize()
+    if mline == h then
+        movemonitor.setCursorPos(1,1)
+        movemonitor.setTextColor(colors.green)
+        movemonitor.write("Moves")
+        mline = 2
+    else
+        mline = mline+1
+    end
+end
+function Mmoves()
+    while true do
+        
+        if selectedpieceobj ~= nil then
+            if #takeablepieces == 0 and #pieceValidMoves == 0 then
+                local Moves = chessAlgorithm.GetMoves(selectedpieceobj,pieceLayout)
+        for keym, valuem in pairs(Moves) do
+            for keyp, valuep in pairs(pieceLayout) do
+                if valuem.x == valuep.x and valuem.y == valuep.y then
+                    if valuep.pieceName ~= "none"  then
+                        if valuep.color ~= playersturn then
+                            takeablepieces[keyp] = valuem
+                            
+                        end
+                    else
+
+                        pieceValidMoves[keyp] = valuem
+                    end
+                end
+                
+            end
+        end
+            end
+        else
+            takeablepieces = {}
+            pieceValidMoves = {}
+        end
+        sleep(.1)
+        
+    end
+end
 function b()
     --reciving
     while true do
@@ -147,6 +152,7 @@ function b()
         if value.color == playersturn then
             if value.x == x and value.y == y then
                 print("Piece Interacted : "..value.pieceName..", "..value.color..", "..value.init)
+                selectedpieceobj = value
                 selectedpiece = index
                 local eventt, sidet, xt, yt
                 repeat
@@ -161,10 +167,17 @@ function b()
                             SavedValues.newSpaceInit = valuel.init
                             if value.x == xt and value.y == yt then
                                 selectedpiece = ""
+                                selectedpieceobj = nil
                                 break
                             end
                             if valuel.color == playersturn then
                                 selectedpiece = ""
+                                selectedpieceobj = nil
+                                break
+                            end 
+                            if not pieceValidMoves[indexl] and not takeablepieces[indexl] then
+                                selectedpiece = ""
+                                selectedpieceobj = nil
                                 break
                             end
                             valuel.x = value.x
@@ -182,7 +195,11 @@ function b()
                             end
 
                             selectedpiece = ""
-                            printOnPrinter(#Moves..": "..value.pieceName.."."..value.color.." | "..SavedValues.originalSpaceX.."/"..SavedValues.originalSpaceY..">"..SavedValues.newSpaceX.."/"..SavedValues.newSpaceY)
+                            selectedpieceobj = nil
+                            pieceValidMoves = {}
+                            takeablepieces = {}
+                            printOnPrinter(#Moves..": "..value.pieceName.." ("..value.color..") "..chessAlgorithm.trueLocation(SavedValues.originalSpaceX,SavedValues.originalSpaceY)..">"..chessAlgorithm.trueLocation(SavedValues.newSpaceX,SavedValues.newSpaceY))
+                            printMove(value.pieceName,value.color,SavedValues.originalSpaceX,SavedValues.originalSpaceY,SavedValues.newSpaceX,SavedValues.newSpaceY)
                             if playersturn == "W" then
                                 playersturn = "B"
                                 print("Black's Turn")
@@ -200,6 +217,7 @@ function b()
                 if value.x == x and value.y == y then
                     print("CheckMate")
                     printOnPrinter("Checkmate "..playersturn.." Wins")
+                    
                     Moves = {}
                     printer.endPage()
                     local file = fs.open("pieceLayout", "r")
@@ -273,59 +291,70 @@ function e()
     while true do
         if GameStarted == false then
             term.clear()
+            movemonitor.clear()
         term.setCursorPos(1,1)
         print("Game Menu:\n  1 = Start Game Beting\n  2 = Start Game For Fun\n  3 = Config")
         local promt = read()
         if promt == "1" then
             term.clear()
             term.setCursorPos(1,1)
+            local WDisk = WDiskraw.getMountPath()
+            local BDisk = BDiskraw.getMountPath()
             print("Bet Value:\n  Black")
             local BetB = tonumber(read())
             print("  White")
             local BetW = tonumber(read())
             print("Pulling Bets")
-            local charges = {}
-            charges.functionCall = "SetCharge"
-            charges.value = BetB
-            Modem.transmit(10, 10, charges)
-            local sender = {}
-            sender.functionCall = "Run"
-            sender.runningFunc = "Exchange"
+            
             local file = fs.open(fs.combine(BDisk,"Ecard/Data"),"r")
-            local data = textutils.unserialise(file.readAll())
+            local dataB = textutils.unserialise(file.readAll())
             file.close()
-            sender.info = {}
-            sender.info.id = data.fulllink
-            Modem.transmit(10, 10, sender)
-            repeat
-                
-                event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
-            until message.functionCall == "Reply" and message.replyType == "Auth"
-            if message.data == true then
-                print("Black's Bet Recived")
-            else
-                error("Invaild Balance")
-            end
-            local charges = {}
-            charges.functionCall = "SetCharge"
-            charges.value = BetW
-            Modem.transmit(10, 10, charges)
-            local sender = {}
-            sender.functionCall = "Run"
-            sender.runningFunc = "Exchange"
             local file = fs.open(fs.combine(WDisk,"Ecard/Data"),"r")
-            local data = textutils.unserialise(file.readAll())
+            local dataW = textutils.unserialise(file.readAll())
             file.close()
-            sender.info = {}
-            sender.info.id = data.fulllink
-            Modem.transmit(10, 10, sender)
-            local event, side, channel, replyChannel, message, distance
-            repeat
-                
-                event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
-            until message.functionCall == "Reply" and message.replyType == "Auth"
-            if message.data == true then
+            local sender = {}
+            sender.coms = 3210
+            local sendmsg = {}
+            sendmsg.status = "charge"
+            sendmsg.id = dataW.fulllink
+            sendmsg.charge = BetW
+            sender.message = sendmsg
+            rednet.send(575,sender,"PaymentServer")
+            local id, message = rednet.receive()
+            if message.status =="ReplyAuth" and message.ReplyMessage == "Insufficient Funds" then
+                print("Insufficient Chips, White")
+                sleep(1)
+            elseif message.status =="ReplyAuth" and message.ReplyMessage == "Accepted Payment" then
                 print("White's Bet Recived")
+
+                local sender = {}
+                sender.coms = 3210
+                local sendmsg = {}
+                sendmsg.status = "charge"
+                sendmsg.id = dataB.fulllink
+                sendmsg.charge = BetB
+                sender.message = sendmsg
+                rednet.send(575,sender,"PaymentServer")
+                local id, message = rednet.receive()
+                if message.status =="ReplyAuth" and message.ReplyMessage == "Insufficient Funds" then
+                    print("Insufficient Chips, Black")
+                    local sender = {}
+                    sender.coms = 3210
+                    local sendmsg = {}
+                    sendmsg.status = "charge"
+                    sendmsg.id = dataW.fulllink
+                    sendmsg.charge = BetW
+                    sender.message = sendmsg
+                    rednet.send(575,sender,"PaymentServer")
+                    if message.status =="ReplyAuth" and message.ReplyMessage == "Accepted Payment" then
+                        print("Your Chips Have Been Returned White, Black's Chips Had No change")
+                    else
+                        print("ERROR With Returning White's Chips Go To Front Desk And Inform Them Of The Problem")
+                    end
+                    sleep(1)
+                elseif message.status =="ReplyAuth" and message.ReplyMessage == "Accepted Payment" then
+                    print("Black's Bet Recived")
+                    
                 print("Game Ready Press Any Button To start")
                 os.pullEvent("key")
                 print("Game Starting")
@@ -333,9 +362,11 @@ function e()
                 printOnPrinter("Bets: W:"..BetW.." B:"..BetB)
                 GameStarted = true
                 print("Game Running")
-            else
-                error("Invaild Balance")
             end 
+        else
+            print("this should not happen")
+            sleep(2)
+        end
         elseif promt == "2" then
             term.clear()
             term.setCursorPos(1,1)
@@ -350,7 +381,7 @@ function e()
         elseif promt == "3" then
             term.clear()
             term.setCursorPos(1,1)
-            print("Config: \n  1 = Shield: "..tostring(Config.Shield).."\n  2 = Sound: "..tostring(Config.Sound).."\n  3 = Timer: "..tostring(Config.Timer).."("..Config.TimerTime..")")
+            print("Config: \n  1 = Shield: "..tostring(Config.Shield).."\n  2 = Sound: "..tostring(Config.Sound).."\n  3 = Timer: "..tostring(Config.Timer).."("..Config.TimerTime..")\n  4 = Move Inforcement: "..tostring(Config.ForceMoves))
             local promt2 = read()
             if promt2 == "1" then
                 term.clear()
@@ -386,16 +417,31 @@ function e()
                     print("Timer:\n (true/false)")
                     local promt3 = read()
                     if promt3 == "true" then
-                        Config.Sound = true
+                        Config.Timer = true
                         print("Time:\n (In Seconds)")
                         Config.TimerTime = tonumber(read())
                         print("Config Changed")
                         sleep(.5)
                     elseif promt3 == "false" then
-                        Config.Sound = false
+                        Config.Timer = false
                         print("Config Changed")
                         sleep(.5)
                     end
+            elseif promt2 == "4" then
+                term.clear()
+                term.setCursorPos(1,1)
+                print("Warning Beting Inforces This")
+                print("Move Inforcement:\n (true/false)")
+                local promt3 = read()
+                if promt3 == "true" then
+                    Config.ForceMoves = true
+                    print("Config Changed")
+                    sleep(.5)
+                elseif promt3 == "false" then
+                    Config.ForceMoves = false
+                    print("Config Changed")
+                    sleep(.5)
+                end
             end
         end
         end
@@ -404,50 +450,53 @@ function e()
 end
 function f()
     while true do
-        local timer = 60
-        if playersturn == "W" then
-            while true do
-                if timer ~= 0 then
-                    if playersturn == "W" then
-                    
-                        sleep(1)
-                        timer = timer-1 
+        local timer = Config.TimerTime
+        if Config.Timer == true then
+            if playersturn == "W" then
+                while true do
+                    if timer ~= 0 then
+                        if playersturn == "W" then
+                        
+                            sleep(1)
+                            timer = timer-1 
+                        else
+                            break
+                        end
                     else
-                        break
+                        if playersturn == "W" then
+                            playersturn = "B"
+                            break
+                        elseif playersturn == "B" then
+                            playersturn = "W"
+                            break
+                        end
                     end
-                else
-                    if playersturn == "W" then
-                        playersturn = "B"
-                        break
-                    elseif playersturn == "B" then
-                        playersturn = "W"
-                        break
-                    end
-                end
-                
-            end
-        elseif playersturn == "B" then
-            while true do
-                if timer ~= 0 then
-                    if playersturn == "B" then
                     
-                        sleep(1)
-                        timer = timer-1 
-                    else
-                        break
-                    end
-                else
-                    if playersturn == "W" then
-                        playersturn = "B"
-                        break
-                    elseif playersturn == "B" then
-                        playersturn = "W"
-                        break
-                    end
                 end
-                
+            elseif playersturn == "B" then
+                while true do
+                    if timer ~= 0 then
+                        if playersturn == "B" then
+                        
+                            sleep(1)
+                            timer = timer-1 
+                        else
+                            break
+                        end
+                    else
+                        if playersturn == "W" then
+                            playersturn = "B"
+                            break
+                        elseif playersturn == "B" then
+                            playersturn = "W"
+                            break
+                        end
+                    end
+                    
+                end
             end
         end
+        
     end
 end
 
@@ -462,11 +511,5 @@ function terminateinfo()
         end
     end
 end
-Modem.open(10)
-local value = {}
-
-value.functionCall = "SetMode"
-value.mode = 1
-Modem.transmit(10,10,value)
-parallel.waitForAll(a,b,c,d,e,terminateinfo)
+parallel.waitForAll(a,b,c,d,e,Mmoves,terminateinfo)
 

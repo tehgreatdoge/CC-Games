@@ -89,7 +89,7 @@ function messageRecive()
             l.status = "Created"
             l.handler = datar.computer
             l.fulllink = dataw.fulllink
-            rednet.send(id,textutils.serialise(l))
+            rednet.send(id,l)
             
         elseif datar.status == "charge"  then
             local datae = {}
@@ -106,19 +106,19 @@ function messageRecive()
                     l.status = "ReplyAuth"
                     l.handler = datar.computer
                     l.ReplyMessage = "Accepted Payment"
-                    rednet.send(id,textutils.serialise(l))
+                    rednet.send(id,l)
                 else
                     l.status = "ReplyAuth"
                     l.handler = datar.computer
                     l.ReplyMessage = "Insufficient Funds"
-                    rednet.send(id,textutils.serialise(l))
+                    rednet.send(id,l)
                 end
                 
             else 
                 l.status = "ReplyAuth"
                 l.handler = datar.computer
                 l.ReplyMessage = "Invalid Pin"
-                rednet.send(id,textutils.serialise(l))
+                rednet.send(id,l)
             end
         elseif datar.status == "sell" then
             local datae = {}
@@ -136,7 +136,7 @@ function messageRecive()
                         array.fulllink = datasa.fulllink
                         array.pin = datasa.pin
                         array.bal = datasa.bal+returnAmt
-                        rednet.send(id,textutils.serialise(l))
+                        rednet.send(id,l)
                         local accountw = fs.open("Accounts/"..datar.id,"w")
                         accountw.write(textutils.serialise(array))
                         Accountw.close()
@@ -145,7 +145,7 @@ function messageRecive()
                     l.status = "ReplyAuth"
                     l.handler = datar.computer
                     l.ReplyMessage = "InvalidAmt"
-                    rednet.send(id,textutils.serialise(l))
+                    rednet.send(id,l)
                 end
         elseif datar.status== "lookup" then
             local accountr = fs.open("Accounts/"..datar.id,"r")
@@ -154,14 +154,14 @@ function messageRecive()
                 local l = {}
                 l.status = "NonExistent"
                 l.handler = datar.computer
-                rednet.send(id,textutils.serialise(l))
+                rednet.send(id,l)
             else
                 local datam = {}
                 datam.status = "Reply"
                 datam.handler = datar.computer
                 datam.playername = data.playername
                 datam.balance = data.bal
-                rednet.send(id,textutils.serialise(datam))
+                rednet.send(id,datam)
             end
         end
     end
