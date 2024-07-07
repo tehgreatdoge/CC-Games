@@ -148,7 +148,7 @@ function b()
         SavedValues.originalSpaceX = x
         SavedValues.originalSpaceY = y
         local oldPiece, oldIndex = chessAlgorithm.getPieceAt(x,y, pieceLayout)
-        if oldPiece.color == playersturn then
+        if oldPiece.color == playersturn and oldPiece.pieceName ~= "none" then
             print("Piece Interacted : "..oldPiece.pieceName..", "..oldPiece.color..", "..oldPiece.init)
             selectedpieceobj = oldPiece
             selectedpiece = oldIndex
