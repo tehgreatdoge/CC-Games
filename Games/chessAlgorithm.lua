@@ -1,5 +1,7 @@
 local Chess = {}
 
+---@alias PieceName "none"|"pawn"|"rook"|"king"|"bishop"|"knight"|"queen"
+---@alias PieceMove {newSpaceInit: integer, newSpacePieceName: PieceName, newSpaceX: integer, newSpaceY: integer, originalSpaceX: integer, originalSpaceY: integer}
 
 function Chess.trueLocation(x,y)
     local output = ""
@@ -74,61 +76,114 @@ function Chess.Identify(piece)
     end
     return color,pieceIcon
 end
+---@param x integer
+---@param y integer
+---@return table piece
+---@return string index
+function Chess.getPieceAt(x, y, Layout)
+    for i,v in pairs(Layout) do
+        if v.x == x and v.y == y then
+            return v, i
+        end
+    end
+end
+---Checks if a given move was a double advance by a pawn.
+---@param move PieceMove
+---@param name PieceName
+---@return boolean 
+function Chess.isMoveDoubleAdvance(move, name)
+    print(name)
+    if name ~= "pawn" then
+        return false
+    end
+    print(math.abs(move.newSpaceY - move.originalSpaceY) == 2)
+    if math.abs(move.newSpaceY - move.originalSpaceY) == 2 then
+        print("IT IS DOUBLE MOVE OMG")
+        return true
+    end
+    return false
+end
 
----@param piece {x: integer, y: integer, color: "W" | "B", pieceName: "none"|"pawn"|"rook"|"king"|"bishop"|"knight"}
+---@param piece {x: integer, y: integer, color: "W" | "B", pieceName: PieceName}
+---@param moveHistory PieceMove[]
+---@return {x: integer, y:integer, captures: nil | {x:integer, y:integer}}[]
 function Chess.GetMoves(piece,Layout, moveHistory)
     ValidMoves = {}
     local Movespaces = 0
     if piece.pieceName == "pawn" then
         if piece.color == "W" then
-            local Movespaces = 0
-            for index, value in pairs(Layout) do
-                if value.x == piece.x and value.y == piece.y-2   then
-                    Movespaces = 2
-                    
-                elseif value.x == piece.x and value.y == piece.y-1   then
-                    Movespaces = 1
+            local MoveDistance = piece.y == 7 and 2 or 1
+            for _, value in pairs(Layout) do
+                if value.pieceName ~= "none" then
+                    if value.x == piece.x then
+                        if value.y == piece.y - 2 then
+                            MoveDistance = math.min(MoveDistance,1)
+                        elseif value.y == piece.y - 1 then
+                            MoveDistance = 0
+                        end
+                    end
+                    if value.y == piece.y-1 and value.color == "B"  then
+                        if value.x-1 == piece.x then
+                            table.insert(ValidMoves, {x=value.x, y=value.y})
+                        elseif value.x+1 == piece.x then
+                            table.insert(ValidMoves, {x=value.x, y=value.y})
+                        end
+                    end
                 end
             end
-            local Move = {}
-            if Movespaces == 2 then
-                Move.x = piece.x
-                Move.y = piece.y-2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x
-                Move.y = piece.y-1
-                ValidMoves[#ValidMoves+1] = Move
-            elseif Movespaces == 1 then
-                local Move = {}
-                Move.x = piece.x
-                Move.y = piece.y-1
-                ValidMoves[#ValidMoves+1] = Move
-            end
-        elseif piece.color == "B" then
-            local Movespaces = 0
-            for index, value in pairs(Layout) do
-                if value.x == piece.x and value.y == piece.y+2   then
-                    Movespaces = 2
-                    
-                elseif value.x == piece.x and value.y == piece.y+1   then
-                    Movespaces = 1
+            MoveDistance = math.min(piece.y-1,MoveDistance)
+            if MoveDistance > 0 then
+                table.insert(ValidMoves,{x=piece.x, y=piece.y-1})
+                if MoveDistance == 2 then
+                    table.insert(ValidMoves,{x=piece.x, y=piece.y-2})
                 end
             end
-            local Move = {}
-            if Movespaces == 2 then
-                Move.x = piece.x
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-            elseif Movespaces == 1 then
-                local Move = {}
-                Move.x = piece.x
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
+            local lastMove = moveHistory[#moveHistory]
+            if lastMove and Chess.isMoveDoubleAdvance(lastMove, Chess.getPieceAt(lastMove.newSpaceX,lastMove.newSpaceY,Layout).pieceName) then
+                if lastMove.newSpaceY == piece.y then
+                    if lastMove.newSpaceX - 1 == piece.x then
+                        table.insert(ValidMoves, {x=lastMove.newSpaceX, y=lastMove.newSpaceY-1, captures={x=lastMove.newSpaceX,y=lastMove.newSpaceY}})
+                    elseif lastMove.newSpaceX + 1 == piece.x then
+                        table.insert(ValidMoves, {x=lastMove.newSpaceX, y=lastMove.newSpaceY-1, captures={x=lastMove.newSpaceX,y=lastMove.newSpaceY}})
+                    end
+                end
+            end
+        else
+            local MoveDistance = piece.y == 2 and 2 or 1
+            for _, value in pairs(Layout) do
+                if value.pieceName ~= "none" then
+                    if value.x == piece.x then
+                        if value.y == piece.y + 2 then
+                            MoveDistance = math.min(MoveDistance,1)
+                        elseif value.y == piece.y + 1 then
+                            MoveDistance = 0
+                        end
+                    end
+                    if value.y == piece.y+1 and value.color == "W" then
+                        if value.x-1 == piece.x then
+                            table.insert(ValidMoves, {x=value.x, y=value.y})
+                        elseif value.x+1 == piece.x then
+                            table.insert(ValidMoves, {x=value.x, y=value.y})
+                        end
+                    end
+                end
+            end
+            MoveDistance = math.min(8-piece.y,MoveDistance)
+            if MoveDistance > 0 then
+                table.insert(ValidMoves,{x=piece.x, y=piece.y+1})
+                if MoveDistance == 2 then
+                    table.insert(ValidMoves,{x=piece.x, y=piece.y+2})
+                end
+            end
+            local lastMove = moveHistory[#moveHistory]
+            if lastMove and Chess.isMoveDoubleAdvance(lastMove, Chess.getPieceAt(lastMove.newSpaceX,lastMove.newSpaceY,Layout).pieceName) then
+                if lastMove.newSpaceY == piece.y then
+                    if lastMove.newSpaceX - 1 == piece.x then
+                        table.insert(ValidMoves, {x=lastMove.newSpaceX, y=lastMove.newSpaceY+1, captures={x=lastMove.newSpaceX,y=lastMove.newSpaceY}})
+                    elseif lastMove.newSpaceX + 1 == piece.x then
+                        table.insert(ValidMoves, {x=lastMove.newSpaceX, y=lastMove.newSpaceY+1, captures={x=lastMove.newSpaceX,y=lastMove.newSpaceY}})
+                    end
+                end
             end
         end
     elseif piece.pieceName == "rook" then

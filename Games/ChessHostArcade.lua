@@ -113,23 +113,22 @@ function Mmoves()
         
         if selectedpieceobj ~= nil then
             if #takeablepieces == 0 and #pieceValidMoves == 0 then
-                local Moves = chessAlgorithm.GetMoves(selectedpieceobj,pieceLayout)
-        for keym, valuem in pairs(Moves) do
-            for keyp, valuep in pairs(pieceLayout) do
-                if valuem.x == valuep.x and valuem.y == valuep.y then
-                    if valuep.pieceName ~= "none"  then
-                        if valuep.color ~= playersturn then
-                            takeablepieces[keyp] = valuem
-                            
+                local Moves = chessAlgorithm.GetMoves(selectedpieceobj,pieceLayout, Moves)
+                for keym, valuem in pairs(Moves) do
+                    for keyp, valuep in pairs(pieceLayout) do
+                        if valuem.x == valuep.x and valuem.y == valuep.y then
+                            if valuep.pieceName ~= "none"  then
+                                if valuep.color ~= playersturn then
+                                    takeablepieces[keyp] = valuem
+                                    
+                                end
+                            else
+                                pieceValidMoves[keyp] = valuem
+                            end
                         end
-                    else
-
-                        pieceValidMoves[keyp] = valuem
+                        
                     end
                 end
-                
-            end
-        end
             end
         else
             takeablepieces = {}
@@ -142,79 +141,89 @@ end
 function b()
     --reciving
     while true do
+        repeat
         if GameStarted == true then
             local event, side, x, y = os.pullEvent("monitor_touch") 
         print("Monitor Touched At (" .. x .. ", " .. y .. ")")
         local SavedValues = {}
         SavedValues.originalSpaceX = x
         SavedValues.originalSpaceY = y
-        for index, value in pairs(pieceLayout) do
-        if value.color == playersturn then
-            if value.x == x and value.y == y then
-                print("Piece Interacted : "..value.pieceName..", "..value.color..", "..value.init)
-                selectedpieceobj = value
-                selectedpiece = index
-                local eventt, sidet, xt, yt
-                repeat
-                    eventt, sidet, xt, yt = os.pullEvent("monitor_touch")
-                until xt <=8 and yt <=8
-                    print("Monitor Touched At (" .. xt .. ", " .. yt .. ")")
-                    SavedValues.newSpaceX = xt
-                    SavedValues.newSpaceY = yt
-                    for indexl, valuel in pairs(pieceLayout) do
-                        if valuel.x == xt and valuel.y == yt then
-                            SavedValues.newSpacePieceName = valuel.pieceName
-                            SavedValues.newSpaceInit = valuel.init
-                            if value.x == xt and value.y == yt then
-                                selectedpiece = ""
-                                selectedpieceobj = nil
-                                break
-                            end
-                            if valuel.color == playersturn then
-                                selectedpiece = ""
-                                selectedpieceobj = nil
-                                break
-                            end 
-                            if not pieceValidMoves[indexl] and not takeablepieces[indexl] then
-                                selectedpiece = ""
-                                selectedpieceobj = nil
-                                break
-                            end
-                            valuel.x = value.x
-                            valuel.y = value.y
-                            value.x = xt
-                            value.y = yt
-                            Moves[#Moves+1] = SavedValues
-                            print("move Saved as "..#Moves)
-                            if valuel.pieceName ~= "none" then
-                                valuel.pieceName = "none"
-                                valuel.init = 0
-                                if speaker and Config.Sound == true then
-                                    speaker.playSound("entity.generic.explode",.5)
-                                end
-                            end
-
-                            selectedpiece = ""
-                            selectedpieceobj = nil
-                            pieceValidMoves = {}
-                            takeablepieces = {}
-                            printOnPrinter(#Moves..": "..value.pieceName.." ("..value.color..") "..chessAlgorithm.trueLocation(SavedValues.originalSpaceX,SavedValues.originalSpaceY)..">"..chessAlgorithm.trueLocation(SavedValues.newSpaceX,SavedValues.newSpaceY))
-                            printMove(value.pieceName,value.color,SavedValues.originalSpaceX,SavedValues.originalSpaceY,SavedValues.newSpaceX,SavedValues.newSpaceY)
-                            if playersturn == "W" then
-                                playersturn = "B"
-                                print("Black's Turn")
-                                break
-                            elseif playersturn == "B" then
-                                playersturn = "W"
-                                print("White's Turn")
-                                break
-                            end
-                        end
-                    end
+        local oldPiece, oldIndex = chessAlgorithm.getPieceAt(x,y, pieceLayout)
+        if oldPiece.color == playersturn then
+            print("Piece Interacted : "..oldPiece.pieceName..", "..oldPiece.color..", "..oldPiece.init)
+            selectedpieceobj = oldPiece
+            selectedpiece = oldIndex
+            --- Await a touch event
+            local eventt, sidet, xt, yt
+            repeat
+                eventt, sidet, xt, yt = os.pullEvent("monitor_touch")
+            until xt <=8 and yt <=8
+                print("Monitor Touched At (" .. xt .. ", " .. yt .. ")")
+                SavedValues.newSpaceX = xt
+                SavedValues.newSpaceY = yt
+                local newPiece, newIndex = chessAlgorithm.getPieceAt(xt, yt, pieceLayout)
+                SavedValues.newSpacePieceName = newPiece.pieceName
+                SavedValues.newSpaceInit = newPiece.init
+                local move = pieceValidMoves[newIndex] or takeablepieces[newIndex]
+                --Remove invalid moves
+                if newPiece == oldPiece then
+                    selectedpiece = ""
+                    selectedpieceobj = nil
                     break
                 end
-            elseif value.color ~= playersturn and value.pieceName == "king" then
-                if value.x == x and value.y == y then
+                if newPiece.color == playersturn then
+                    selectedpiece = ""
+                    selectedpieceobj = nil
+                    break
+                end 
+                if not move then
+                    selectedpiece = ""
+                    selectedpieceobj = nil
+                    break
+                end
+                --Get the captured piece position
+                local cx,cy
+                if move.captures then
+                    print(textutils.serialise(move.captures))
+                    cx = move.captures.x
+                    cy = move.captures.y
+                else
+                    cx = xt
+                    cy = yt
+                end
+                local cPiece = chessAlgorithm.getPieceAt(cx,cy,pieceLayout)
+                --Swap piece positions
+                newPiece.x = oldPiece.x
+                newPiece.y = oldPiece.y
+                oldPiece.x = xt
+                oldPiece.y = yt
+                Moves[#Moves+1] = SavedValues
+                print("move Saved as "..#Moves)
+                if cPiece.pieceName ~= "none" then
+                    cPiece.pieceName = "none"
+                    cPiece.init = 0
+                    if speaker and Config.Sound == true then
+                        speaker.playSound("entity.generic.explode",.5)
+                    end
+                end
+
+                selectedpiece = ""
+                selectedpieceobj = nil
+                pieceValidMoves = {}
+                takeablepieces = {}
+                printOnPrinter(#Moves..": "..oldPiece.pieceName.." ("..oldPiece.color..") "..chessAlgorithm.trueLocation(SavedValues.originalSpaceX,SavedValues.originalSpaceY)..">"..chessAlgorithm.trueLocation(SavedValues.newSpaceX,SavedValues.newSpaceY))
+                printMove(oldPiece.pieceName,oldPiece.color,SavedValues.originalSpaceX,SavedValues.originalSpaceY,SavedValues.newSpaceX,SavedValues.newSpaceY)
+                if playersturn == "W" then
+                    playersturn = "B"
+                    print("Black's Turn")
+                    break
+                elseif playersturn == "B" then
+                    playersturn = "W"
+                    print("White's Turn")
+                    break
+                end
+            elseif oldPiece.color ~= playersturn and oldPiece.pieceName == "king" then
+                if oldPiece.x == x and oldPiece.y == y then
                     print("CheckMate")
                     printOnPrinter("Checkmate "..playersturn.." Wins")
                     
@@ -227,12 +236,11 @@ function b()
                     GameStarted = false
                     playersturn = "W"
                 end
-                
-                
-            end
             end
         end
         sleep(.1)
+            
+    until 1==1
     end
         
 end    
