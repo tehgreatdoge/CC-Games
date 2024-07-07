@@ -24,6 +24,7 @@ local function saveMachineConfig()
     wh.close()
 end
 if not machineConfig.startupFile then
+    print("Please enter file to run (including.lua)")
     machineConfig.startupFile = read()
     saveMachineConfig()
 end
