@@ -184,7 +184,6 @@ function b()
                 --Get the captured piece position
                 local cx,cy
                 if move.captures then
-                    print(textutils.serialise(move.captures))
                     cx = move.captures.x
                     cy = move.captures.y
                 else

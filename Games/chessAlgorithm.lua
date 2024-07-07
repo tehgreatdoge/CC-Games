@@ -92,13 +92,11 @@ end
 ---@param name PieceName
 ---@return boolean 
 function Chess.isMoveDoubleAdvance(move, name)
-    print(name)
     if name ~= "pawn" then
         return false
     end
-    print(math.abs(move.newSpaceY - move.originalSpaceY) == 2)
     if math.abs(move.newSpaceY - move.originalSpaceY) == 2 then
-        print("IT IS DOUBLE MOVE OMG")
+
         return true
     end
     return false
@@ -1371,8 +1369,65 @@ function Chess.GetMoves(piece,Layout, moveHistory)
                     else
                         Movespaces = math.min(Movespaces, 0)
                     end
-                end
+                end    
+            
             end
+        end
+        elseif piece.pieceName == "king" then
+                for key, value in pairs(Layout) do
+                    if piece.x+1 == value.x and piece.y == value.y and piece.color ~= value.color then
+                        
+                        local Move = {}
+                        Move.x = piece.x+1
+                        Move.y = piece.y
+                        ValidMoves[#ValidMoves+1] = Move
+                    
+                    end
+                    if piece.x == value.x and piece.y+1 == value.y and piece.color ~= value.color then
+                        
+                        local Move = {}
+                        Move.x = piece.x
+                        Move.y = piece.y+1
+                        ValidMoves[#ValidMoves+1] = Move
+                    end
+                    if piece.x-1 == value.x and piece.y == value.y and piece.color ~= value.color then
+                        local Move = {}
+                        Move.x = piece.x-1
+                        Move.y = piece.y
+                        ValidMoves[#ValidMoves+1] = Move
+                    end
+                    if piece.x == value.x and piece.y-1 == value.y and piece.color ~= value.color then
+                        local Move = {}
+                        Move.x = piece.x
+                        Move.y = piece.y-1
+                        ValidMoves[#ValidMoves+1] = Move
+                        
+                    end
+                    if piece.x+1 == value.x and piece.y-1 == value.y and piece.color ~= value.color then
+                        local Move = {}
+                        Move.x = piece.x+1
+                        Move.y = piece.y-1
+                        ValidMoves[#ValidMoves+1] = Move
+                    end
+                    if piece.x-1 == value.x and piece.y-1 == value.y and piece.color ~= value.color then
+                        local Move = {}
+                        Move.x = piece.x-1
+                        Move.y = piece.y-1
+                        ValidMoves[#ValidMoves+1] = Move
+                    end
+                    if piece.x+1 == value.x and piece.y+1 == value.y and piece.color ~= value.color then
+                        local Move = {}
+                        Move.x = piece.x+1
+                        Move.y = piece.y+1
+                        ValidMoves[#ValidMoves+1] = Move
+                    end
+                    if piece.x-1 == value.x and piece.y+1 == value.y and piece.color ~= value.color then
+                        local Move = {}
+                        Move.x = piece.x-1
+                        Move.y = piece.y+1
+                        ValidMoves[#ValidMoves+1] = Move
+                    end
+                end
         end
         if Movespaces >= 1 then
             for i=1, Movespaces do
@@ -1384,7 +1439,6 @@ function Chess.GetMoves(piece,Layout, moveHistory)
                 end
             end
         end
-    end
     return ValidMoves
 end
 
