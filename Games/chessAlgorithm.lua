@@ -75,7 +75,8 @@ function Chess.Identify(piece)
     return color,pieceIcon
 end
 
-function Chess.GetMoves(piece,Layout)
+---@param piece {x: integer, y: integer, color: "W" | "B", pieceName: "none"|"pawn"|"rook"|"king"|"bishop"|"knight"}
+function Chess.GetMoves(piece,Layout, moveHistory)
     ValidMoves = {}
     local Movespaces = 0
     if piece.pieceName == "pawn" then
@@ -133,934 +134,287 @@ function Chess.GetMoves(piece,Layout)
     elseif piece.pieceName == "rook" then
         X = 0
         Y = 0
-        local Movespaces = 0
+        local Movespaces = 7
 
         for index, value in pairs(Layout) do
-            if value.x == piece.x+8 and value.y == piece.y then
-                
-                if value.pieceName == "none" then
-                    Movespaces = 8
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            if value.x == piece.x+7 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
                     end
                 end
-            elseif value.x == piece.x+7 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 7
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+6 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
                     end
                 end
-            elseif value.x == piece.x+6 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 6
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x+5 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 5
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+5 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
                     end
                 end
             elseif value.x == piece.x+4 and value.y == piece.y then
-                if value.pieceName == "none" then
-                    Movespaces = 4
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
                     end
                 end
             elseif value.x == piece.x+3 and value.y == piece.y then
-                if value.pieceName == "none" then
-                    Movespaces = 3
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
                     end
                 end
-            elseif value.x == piece.x+2 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 2
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+2 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
                     end
                 end
-            elseif value.x == piece.x+1 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+1 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
                     end
                 end
             end
         end
-        if Movespaces == 8 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+7
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+8
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces ==7 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+7
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 6 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 5 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 4 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 3 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 2 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 1 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changing = piece.x + i
+                if changing >= 1 and changing <= 8 then
+                    local move = {x=changing,y=piece.y}
+                    table.insert(ValidMoves, move)
+                end
+            end
         end
-        local Movespaces = 0
-        
+        local Movespaces = 7
+
         for index, value in pairs(Layout) do
-            if value.x == piece.x-8 and value.y == piece.y   then
-                
-                if value.pieceName == "none" then
-                    Movespaces = 8
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            if value.x == piece.x-7 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
                     end
                 end
-                
-            elseif value.x == piece.x-7 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 7
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-6 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
                     end
                 end
-            elseif value.x == piece.x-6 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 6
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-5 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
                     end
                 end
-            elseif value.x == piece.x-5 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 5
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-4 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
                     end
                 end
-            elseif value.x == piece.x-4 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 4
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-3 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
                     end
                 end
-            elseif value.x == piece.x-3 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 3
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-2 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
                     end
                 end
-            elseif value.x == piece.x-2 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 2
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x-1 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-1 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
                     end
                 end
             end
-            if Movespaces ~= 8 then
-                if value.pieceName ~= "none" and piece.color ~= value.color then
-                    Movespaces = Movespaces+1
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changing = piece.x - i
+                if changing >= 1 and changing <= 8 then
+                    local move = {x=changing,y=piece.y}
+                    table.insert(ValidMoves, move)
                 end
             end
         end
-        if Movespaces == 8 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-7
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-8
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces ==7 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-7
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 6 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 5 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 4 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 3 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 2 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 1 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x and value.y == piece.y+7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y+6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y+5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y+4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y+3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y+2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y+1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
+            end
         end
-        local Movespaces = 0
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changing = piece.y + i
+                if changing >= 1 and changing <= 8 then
+                    local move = {x=piece.x,y=changing}
+                    table.insert(ValidMoves, move)
+                end
+            end
+        end
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x and value.y == piece.y-7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y-6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y-5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y-4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y-3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y-2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x and value.y == piece.y-1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
+            end
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changing = piece.y - i
+                if changing >= 1 and changing <= 8 then
+                    local move = {x=piece.x,y=changing}
+                    table.insert(ValidMoves, move)
+                end
+            end
+        end
             
-        for index, value in pairs(Layout) do
-            if value.x == piece.x and value.y == piece.y+8   then
-                if value.pieceName == "none" then
-                    Movespaces = 8
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y+7   then
-                if value.pieceName == "none" then
-                    Movespaces = 7
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y+6   then
-                if value.pieceName == "none" then
-                    Movespaces = 6
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y+5   then
-                if value.pieceName == "none" then
-                    Movespaces = 5
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y+4   then
-                if value.pieceName == "none" then
-                    Movespaces = 4
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y+3   then
-                if value.pieceName == "none" then
-                    Movespaces = 3
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y+2   then
-                if value.pieceName == "none" then
-                    Movespaces = 2
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y+1   then
-                if value.pieceName == "none" then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            end
-        end
-        if Movespaces == 8 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+6
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+7
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+8
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces ==7 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+6
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+7
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 6 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+6
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 5 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+5
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 4 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 3 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 2 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 1 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-        end
-        local Movespaces =0
-        for index, value in pairs(Layout) do
-            if value.x == piece.x and value.y == piece.y-8   then
-                if value.pieceName == "none" then
-                    Movespaces = 8
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y-7   then
-                
-                if value.pieceName == "none" then
-                    Movespaces = 7
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y-6   then
-                if value.pieceName == "none" then
-                    Movespaces = 6
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y-5   then
-                if value.pieceName == "none" then
-                    Movespaces = 5
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y-4   then
-                if value.pieceName == "none" then
-                    Movespaces = 4
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y-3   then
-                if value.pieceName == "none" then
-                    Movespaces = 3
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y-2   then
-                if value.pieceName == "none" then
-                    Movespaces = 2
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y-1   then
-                if value.pieceName == "none" then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            end
-        end
-        if Movespaces == 8 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-6
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-7
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-8
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces ==7 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-6
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-7
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 6 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-6
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 5 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-5
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 4 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 3 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 2 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 1 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-        end
             
     elseif piece.pieceName == "knight" then
         
@@ -1123,2634 +477,856 @@ function Chess.GetMoves(piece,Layout)
             end
         end
     elseif piece.pieceName == "bishop" then
-        local Movespaces =0
-        for index, value in pairs(Layout) do
-            if value.x == piece.x-8 and value.y == piece.y+8   then
-                Movespaces = 8
-                
-            elseif value.x == piece.x-7 and value.y == piece.y+7   then
-                Movespaces = 7
-            elseif value.x == piece.x-6 and value.y == piece.y+6   then
-                Movespaces = 6
-            elseif value.x == piece.x-5 and value.y == piece.y+5   then
-                Movespaces = 5
-            elseif value.x == piece.x-4 and value.y == piece.y+4   then
-                Movespaces = 4
-            elseif value.x == piece.x-3 and value.y == piece.y+3   then
-                Movespaces = 3
-            elseif value.x == piece.x-2 and value.y == piece.y+2   then
-                Movespaces = 2
-            elseif value.x == piece.x-1 and value.y == piece.y+1   then
-                Movespaces = 1
-            end
-            if Movespaces ~= 8 then
-                if value.pieceName ~= "none" and piece.color ~= value.color then
-                    Movespaces = Movespaces+1
-                end
-            end
-        end
-                if Movespaces == 8 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-5
-                Move.y = piece.y+5
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-6
-                Move.y = piece.y+6
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-7
-                Move.y = piece.y+7
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-8
-                Move.y = piece.y+8
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 7 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-5
-                Move.y = piece.y+5
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-6
-                Move.y = piece.y+6
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-7
-                Move.y = piece.y+7
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 6 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-5
-                Move.y = piece.y+5
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-6
-                Move.y = piece.y+6
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 5 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-5
-                Move.y = piece.y+5
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 4 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 3 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 2 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 1 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-    
-                end
-                local Movespaces =0
-                for index, value in pairs(Layout) do
-                if value.x == piece.x+8 and value.y == piece.y+8   then
-                    Movespaces = 8
-                    
-                elseif value.x == piece.x+7 and value.y == piece.y+7   then
-                    Movespaces = 7
-                elseif value.x == piece.x+6 and value.y == piece.y+6   then
-                    Movespaces = 6
-                elseif value.x == piece.x+5 and value.y == piece.y+5   then
-                    Movespaces = 5
-                elseif value.x == piece.x+4 and value.y == piece.y+4   then
-                    Movespaces = 4
-                elseif value.x == piece.x+3 and value.y == piece.y+3   then
-                    Movespaces = 3
-                elseif value.x == piece.x+2 and value.y == piece.y+2   then
-                    Movespaces = 2
-                elseif value.x == piece.x+1 and value.y == piece.y+1   then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            end
-                    if Movespaces == 8 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+5
-                    Move.y = piece.y+5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+6
-                    Move.y = piece.y+6
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+7
-                    Move.y = piece.y+7
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+8
-                    Move.y = piece.y+8
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 7 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+5
-                    Move.y = piece.y+5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+6
-                    Move.y = piece.y+6
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+7
-                    Move.y = piece.y+7
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 6 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+5
-                    Move.y = piece.y+5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+6
-                    Move.y = piece.y+6
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 5 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+5
-                    Move.y = piece.y+5
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 4 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 3 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 2 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 1 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-        
-                    end
-                    local Movespaces =0
-            for index, value in pairs(Layout) do
-                if value.x == piece.x-8 and value.y == piece.y-8   then
-                    if value.pieceName == "none" then
-                        Movespaces = 8
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                    
-                elseif value.x == piece.x-7 and value.y == piece.y-7   then
-                    if value.pieceName == "none" then
-                        Movespaces = 7
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-6 and value.y == piece.y-6   then
-                    if value.pieceName == "none" then
-                        Movespaces = 6
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-5 and value.y == piece.y-5   then
-                    if value.pieceName == "none" then
-                        Movespaces = 5
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-4 and value.y == piece.y-4   then
-                    if value.pieceName == "none" then
-                        Movespaces = 4
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-3 and value.y == piece.y-3   then
-                    if value.pieceName == "none" then
-                        Movespaces = 3
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-2 and value.y == piece.y-2   then
-                    if value.pieceName == "none" then
-                        Movespaces = 2
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-1 and value.y == piece.y-1   then
-                    if value.pieceName == "none" then
-                        Movespaces = 1
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                end
-            end
-                    if Movespaces == 8 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-5
-                    Move.y = piece.y-5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-6
-                    Move.y = piece.y-6
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-7
-                    Move.y = piece.y-7
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-8
-                    Move.y = piece.y-8
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 7 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-5
-                    Move.y = piece.y-5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-6
-                    Move.y = piece.y-6
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-7
-                    Move.y = piece.y-7
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 6 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-5
-                    Move.y = piece.y-5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-6
-                    Move.y = piece.y-6
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 5 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-5
-                    Move.y = piece.y-5
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 4 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 3 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 2 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 1 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-        
-                    end
-                    local Movespaces =0
-                    for key, value in pairs(Layout) do
-                        if value.x == piece.x-8 and value.y == piece.y-8   then
-                            if value.pieceName == "none" then
-                                Movespaces = 8
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                            
-                        elseif value.x == piece.x-7 and value.y == piece.y-7   then
-                            if value.pieceName == "none" then
-                                Movespaces = 7
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-6 and value.y == piece.y-6   then
-                            if value.pieceName == "none" then
-                                Movespaces = 6
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-5 and value.y == piece.y-5   then
-                            if value.pieceName == "none" then
-                                Movespaces = 5
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-4 and value.y == piece.y-4   then
-                            if value.pieceName == "none" then
-                                Movespaces = 4
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-3 and value.y == piece.y-3   then
-                            if value.pieceName == "none" then
-                                Movespaces = 3
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-2 and value.y == piece.y-2   then
-                            if value.pieceName == "none" then
-                                Movespaces = 2
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-1 and value.y == piece.y-1   then
-                            if value.pieceName == "none" then
-                                Movespaces = 1
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        end
-                    end
-                    
-                        if Movespaces == 8 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+5
-                        Move.y = piece.y-5
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+6
-                        Move.y = piece.y-6
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+7
-                        Move.y = piece.y-7
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+8
-                        Move.y = piece.y-8
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 7 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+5
-                        Move.y = piece.y-5
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+6
-                        Move.y = piece.y-6
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+7
-                        Move.y = piece.y-7
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 6 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+5
-                        Move.y = piece.y-5
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+6
-                        Move.y = piece.y-6
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 5 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+5
-                        Move.y = piece.y-5
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 4 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 3 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 2 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 1 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-            
-                        end
-    elseif piece.pieceName == "queen" then
-        local Movespaces =0
-        for index, value in pairs(Layout) do
-            if value.x == piece.x-8 and value.y == piece.y+8   then
-                Movespaces = 8
-                
-            elseif value.x == piece.x-7 and value.y == piece.y+7   then
-                Movespaces = 7
-            elseif value.x == piece.x-6 and value.y == piece.y+6   then
-                Movespaces = 6
-            elseif value.x == piece.x-5 and value.y == piece.y+5   then
-                Movespaces = 5
-            elseif value.x == piece.x-4 and value.y == piece.y+4   then
-                Movespaces = 4
-            elseif value.x == piece.x-3 and value.y == piece.y+3   then
-                Movespaces = 3
-            elseif value.x == piece.x-2 and value.y == piece.y+2   then
-                Movespaces = 2
-            elseif value.x == piece.x-1 and value.y == piece.y+1   then
-                Movespaces = 1
-            end
-            if Movespaces ~= 8 then
-                if value.pieceName ~= "none" and piece.color ~= value.color then
-                    Movespaces = Movespaces+1
-                end
-            end
-        end
-                if Movespaces == 8 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-5
-                Move.y = piece.y+5
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-6
-                Move.y = piece.y+6
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-7
-                Move.y = piece.y+7
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-8
-                Move.y = piece.y+8
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 7 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-5
-                Move.y = piece.y+5
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-6
-                Move.y = piece.y+6
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-7
-                Move.y = piece.y+7
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 6 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-5
-                Move.y = piece.y+5
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-6
-                Move.y = piece.y+6
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 5 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-5
-                Move.y = piece.y+5
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 4 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-4
-                Move.y = piece.y+4
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 3 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-3
-                Move.y = piece.y+3
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 2 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-                local Move = {}
-                Move.x = piece.x-2
-                Move.y = piece.y+2
-                ValidMoves[#ValidMoves+1] = Move
-                elseif Movespaces == 1 then
-                    local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
-    
-                end
-                local Movespaces =0
-                for index, value in pairs(Layout) do
-                if value.x == piece.x+8 and value.y == piece.y+8   then
-                    Movespaces = 8
-                    
-                elseif value.x == piece.x+7 and value.y == piece.y+7   then
-                    Movespaces = 7
-                elseif value.x == piece.x+6 and value.y == piece.y+6   then
-                    Movespaces = 6
-                elseif value.x == piece.x+5 and value.y == piece.y+5   then
-                    Movespaces = 5
-                elseif value.x == piece.x+4 and value.y == piece.y+4   then
-                    Movespaces = 4
-                elseif value.x == piece.x+3 and value.y == piece.y+3   then
-                    Movespaces = 3
-                elseif value.x == piece.x+2 and value.y == piece.y+2   then
-                    Movespaces = 2
-                elseif value.x == piece.x+1 and value.y == piece.y+1   then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            end
-                    if Movespaces == 8 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+5
-                    Move.y = piece.y+5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+6
-                    Move.y = piece.y+6
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+7
-                    Move.y = piece.y+7
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+8
-                    Move.y = piece.y+8
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 7 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+5
-                    Move.y = piece.y+5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+6
-                    Move.y = piece.y+6
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+7
-                    Move.y = piece.y+7
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 6 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+5
-                    Move.y = piece.y+5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+6
-                    Move.y = piece.y+6
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 5 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+5
-                    Move.y = piece.y+5
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 4 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+4
-                    Move.y = piece.y+4
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 3 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+3
-                    Move.y = piece.y+3
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 2 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x+2
-                    Move.y = piece.y+2
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 1 then
-                        local Move = {}
-                    Move.x = piece.x+1
-                    Move.y = piece.y+1
-                    ValidMoves[#ValidMoves+1] = Move
-        
-                    end
-                    local Movespaces =0
-            for index, value in pairs(Layout) do
-                if value.x == piece.x-8 and value.y == piece.y-8   then
-                    if value.pieceName == "none" then
-                        Movespaces = 8
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                    
-                elseif value.x == piece.x-7 and value.y == piece.y-7   then
-                    if value.pieceName == "none" then
-                        Movespaces = 7
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-6 and value.y == piece.y-6   then
-                    if value.pieceName == "none" then
-                        Movespaces = 6
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-5 and value.y == piece.y-5   then
-                    if value.pieceName == "none" then
-                        Movespaces = 5
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-4 and value.y == piece.y-4   then
-                    if value.pieceName == "none" then
-                        Movespaces = 4
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-3 and value.y == piece.y-3   then
-                    if value.pieceName == "none" then
-                        Movespaces = 3
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-2 and value.y == piece.y-2   then
-                    if value.pieceName == "none" then
-                        Movespaces = 2
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                elseif value.x == piece.x-1 and value.y == piece.y-1   then
-                    if value.pieceName == "none" then
-                        Movespaces = 1
-                    end
-                    if Movespaces ~= 8 then
-                        if value.pieceName ~= "none" and piece.color ~= value.color then
-                            Movespaces = Movespaces+1
-                        end
-                    end
-                end
-            end
-                    if Movespaces == 8 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-5
-                    Move.y = piece.y-5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-6
-                    Move.y = piece.y-6
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-7
-                    Move.y = piece.y-7
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-8
-                    Move.y = piece.y-8
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 7 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-5
-                    Move.y = piece.y-5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-6
-                    Move.y = piece.y-6
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-7
-                    Move.y = piece.y-7
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 6 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-5
-                    Move.y = piece.y-5
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-6
-                    Move.y = piece.y-6
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 5 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-5
-                    Move.y = piece.y-5
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 4 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-4
-                    Move.y = piece.y-4
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 3 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-3
-                    Move.y = piece.y-3
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 2 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-                    local Move = {}
-                    Move.x = piece.x-2
-                    Move.y = piece.y-2
-                    ValidMoves[#ValidMoves+1] = Move
-                    elseif Movespaces == 1 then
-                        local Move = {}
-                    Move.x = piece.x-1
-                    Move.y = piece.y-1
-                    ValidMoves[#ValidMoves+1] = Move
-        
-                    end
-                    local Movespaces =0
-                    for key, value in pairs(Layout) do
-                        if value.x == piece.x-8 and value.y == piece.y-8   then
-                            if value.pieceName == "none" then
-                                Movespaces = 8
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                            
-                        elseif value.x == piece.x-7 and value.y == piece.y-7   then
-                            if value.pieceName == "none" then
-                                Movespaces = 7
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-6 and value.y == piece.y-6   then
-                            if value.pieceName == "none" then
-                                Movespaces = 6
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-5 and value.y == piece.y-5   then
-                            if value.pieceName == "none" then
-                                Movespaces = 5
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-4 and value.y == piece.y-4   then
-                            if value.pieceName == "none" then
-                                Movespaces = 4
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-3 and value.y == piece.y-3   then
-                            if value.pieceName == "none" then
-                                Movespaces = 3
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-2 and value.y == piece.y-2   then
-                            if value.pieceName == "none" then
-                                Movespaces = 2
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        elseif value.x == piece.x-1 and value.y == piece.y-1   then
-                            if value.pieceName == "none" then
-                                Movespaces = 1
-                            end
-                            if Movespaces ~= 8 then
-                                if value.pieceName ~= "none" and piece.color ~= value.color then
-                                    Movespaces = Movespaces+1
-                                end
-                            end
-                        end
-                    end
-                    
-                        if Movespaces == 8 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+5
-                        Move.y = piece.y-5
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+6
-                        Move.y = piece.y-6
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+7
-                        Move.y = piece.y-7
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+8
-                        Move.y = piece.y-8
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 7 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+5
-                        Move.y = piece.y-5
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+6
-                        Move.y = piece.y-6
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+7
-                        Move.y = piece.y-7
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 6 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+5
-                        Move.y = piece.y-5
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+6
-                        Move.y = piece.y-6
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 5 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+5
-                        Move.y = piece.y-5
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 4 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+4
-                        Move.y = piece.y-4
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 3 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+3
-                        Move.y = piece.y-3
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 2 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-                        local Move = {}
-                        Move.x = piece.x+2
-                        Move.y = piece.y-2
-                        ValidMoves[#ValidMoves+1] = Move
-                        elseif Movespaces == 1 then
-                            local Move = {}
-                        Move.x = piece.x+1
-                        Move.y = piece.y-1
-                        ValidMoves[#ValidMoves+1] = Move
-            
-                        end
-        local Movespaces = 0
+        local Movespaces = 7
 
         for index, value in pairs(Layout) do
-            if value.x == piece.x+8 and value.y == piece.y then
-                
-                if value.pieceName == "none" then
-                    Movespaces = 8
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            if value.x == piece.x+7 and value.y == piece.y+7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
                     end
                 end
-            elseif value.x == piece.x+7 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 7
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+6 and value.y == piece.y+6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
                     end
                 end
-            elseif value.x == piece.x+6 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 6
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+5 and value.y == piece.y+5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
                     end
                 end
-            elseif value.x == piece.x+5 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 5
+            elseif value.x == piece.x+4 and value.y == piece.y+4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
                 end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+3 and value.y == piece.y+3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x+2 and value.y == piece.y+2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x+1 and value.y == piece.y+1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
+            end
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changingX = piece.x + i
+                local changingY = piece.y + i
+                if changingX >= 1 and changingX <= 8 and changingY >= 1 and changingY <= 8 then
+                    local move = {x=changingX,y=changingY}
+                    table.insert(ValidMoves, move)
+                end
+            end
+        end
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x-7 and value.y == piece.y+7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x-6 and value.y == piece.y+6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x-5 and value.y == piece.y+5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x-4 and value.y == piece.y+4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x-3 and value.y == piece.y+3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x-2 and value.y == piece.y+2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x-1 and value.y == piece.y+1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
+            end
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changingX = piece.x - i
+                local changingY = piece.y + i
+                if changingX >= 1 and changingX <= 8 and changingY >= 1 and changingY <= 8 then
+                    local move = {x=changingX,y=changingY}
+                    table.insert(ValidMoves, move)
+                end
+            end
+        end
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x-7 and value.y == piece.y-7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x-6 and value.y == piece.y-6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x-5 and value.y == piece.y-5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x-4 and value.y == piece.y-4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x-3 and value.y == piece.y-3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x-2 and value.y == piece.y-2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x-1 and value.y == piece.y-1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
+            end
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changingX = piece.x - i
+                local changingY = piece.y - i
+                if changingX >= 1 and changingX <= 8 and changingY >= 1 and changingY <= 8 then
+                    local move = {x=changingX,y=changingY}
+                    table.insert(ValidMoves, move)
+                end
+            end
+        end
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x+7 and value.y == piece.y-7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x+6 and value.y == piece.y-6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x+5 and value.y == piece.y-5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x+4 and value.y == piece.y-4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x+3 and value.y == piece.y-3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x+2 and value.y == piece.y-2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x+1 and value.y == piece.y-1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
+            end
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changingX = piece.x + i
+                local changingY = piece.y - i
+                if changingX >= 1 and changingX <= 8 and changingY >= 1 and changingY <= 8 then
+                    local move = {x=changingX,y=changingY}
+                    table.insert(ValidMoves, move)
+                end
+            end
+        end
+        
+    elseif piece.pieceName == "queen" then
+        X = 0
+        Y = 0
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x+7 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x+6 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x+5 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
                     end
                 end
             elseif value.x == piece.x+4 and value.y == piece.y then
-                if value.pieceName == "none" then
-                    Movespaces = 4
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
                     end
                 end
             elseif value.x == piece.x+3 and value.y == piece.y then
-                if value.pieceName == "none" then
-                    Movespaces = 3
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
                     end
                 end
-            elseif value.x == piece.x+2 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 2
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+2 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
                     end
                 end
-            elseif value.x == piece.x+1 and value.y == piece.y  then
-                if value.pieceName == "none" then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x+1 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
                     end
                 end
             end
         end
-        if Movespaces == 8 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+7
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+8
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces ==7 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+7
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 6 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 5 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 4 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 3 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 2 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x+2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 1 then
-            local Move = {}
-            Move.x = piece.x+1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changing = piece.x + i
+                if changing >= 1 and changing <= 8 then
+                    local move = {x=changing,y=piece.y}
+                    table.insert(ValidMoves, move)
+                end
+            end
         end
-        local Movespaces = 0
-        
+        local Movespaces = 7
+
         for index, value in pairs(Layout) do
-            if value.x == piece.x-8 and value.y == piece.y   then
-                
-                if value.pieceName == "none" then
-                    Movespaces = 8
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            if value.x == piece.x-7 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
                     end
                 end
-                
-            elseif value.x == piece.x-7 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 7
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-6 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
                     end
                 end
-            elseif value.x == piece.x-6 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 6
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-5 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
                     end
                 end
-            elseif value.x == piece.x-5 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 5
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-4 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
                     end
                 end
-            elseif value.x == piece.x-4 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 4
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-3 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
                     end
                 end
-            elseif value.x == piece.x-3 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 3
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-2 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
                     end
                 end
-            elseif value.x == piece.x-2 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 2
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x-1 and value.y == piece.y   then
-                if value.pieceName == "none" then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x-1 and value.y == piece.y then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
                     end
                 end
             end
-            if Movespaces ~= 8 then
-                if value.pieceName ~= "none" and piece.color ~= value.color then
-                    Movespaces = Movespaces+1
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changing = piece.x - i
+                if changing >= 1 and changing <= 8 then
+                    local move = {x=changing,y=piece.y}
+                    table.insert(ValidMoves, move)
                 end
             end
         end
-        if Movespaces == 8 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-7
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-8
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces ==7 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-7
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 6 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-6
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 5 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-5
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 4 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-4
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 3 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-3
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 2 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x-2
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 1 then
-            local Move = {}
-            Move.x = piece.x-1
-            Move.y = piece.y
-            ValidMoves[#ValidMoves+1] = Move
-        end
-        local Movespaces = 0
-            
+        local Movespaces = 7
+
         for index, value in pairs(Layout) do
-            if value.x == piece.x and value.y == piece.y+8   then
-                if value.pieceName == "none" then
-                    Movespaces = 8
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            if value.x == piece.x and value.y == piece.y+7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y+7   then
-                if value.pieceName == "none" then
-                    Movespaces = 7
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y+6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y+6   then
-                if value.pieceName == "none" then
-                    Movespaces = 6
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y+5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y+5   then
-                if value.pieceName == "none" then
-                    Movespaces = 5
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y+4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y+4   then
-                if value.pieceName == "none" then
-                    Movespaces = 4
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y+3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y+3   then
-                if value.pieceName == "none" then
-                    Movespaces = 3
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y+2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y+2   then
-                if value.pieceName == "none" then
-                    Movespaces = 2
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y+1   then
-                if value.pieceName == "none" then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y+1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
                     end
                 end
             end
         end
-        if Movespaces == 8 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+6
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+7
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+8
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces ==7 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+6
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+7
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 6 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+6
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 5 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+5
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 4 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+4
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 3 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+3
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 2 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+2
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 1 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y+1
-            ValidMoves[#ValidMoves+1] = Move
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changing = piece.y + i
+                if changing >= 1 and changing <= 8 then
+                    local move = {x=piece.x,y=changing}
+                    table.insert(ValidMoves, move)
+                end
+            end
         end
-        local Movespaces =0
+        local Movespaces = 7
+
         for index, value in pairs(Layout) do
-            if value.x == piece.x and value.y == piece.y-8   then
-                if value.pieceName == "none" then
-                    Movespaces = 8
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            if value.x == piece.x and value.y == piece.y-7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y-7   then
-                
-                if value.pieceName == "none" then
-                    Movespaces = 7
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y-6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y-6   then
-                if value.pieceName == "none" then
-                    Movespaces = 6
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y-5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y-5   then
-                if value.pieceName == "none" then
-                    Movespaces = 5
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y-4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y-4   then
-                if value.pieceName == "none" then
-                    Movespaces = 4
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y-3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y-3   then
-                if value.pieceName == "none" then
-                    Movespaces = 3
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y-2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
                     end
                 end
-            elseif value.x == piece.x and value.y == piece.y-2   then
-                if value.pieceName == "none" then
-                    Movespaces = 2
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
-                    end
-                end
-            elseif value.x == piece.x and value.y == piece.y-1   then
-                if value.pieceName == "none" then
-                    Movespaces = 1
-                end
-                if Movespaces ~= 8 then
-                    if value.pieceName ~= "none" and piece.color ~= value.color then
-                        Movespaces = Movespaces+1
+            elseif value.x == piece.x and value.y == piece.y-1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
                     end
                 end
             end
         end
-        if Movespaces == 8 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-6
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-7
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-8
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces ==7 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-6
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-7
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 6 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-5
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-6
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 5 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-5
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 4 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-4
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 3 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-3
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 2 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-2
-            ValidMoves[#ValidMoves+1] = Move
-        elseif Movespaces == 1 then
-            local Move = {}
-            Move.x = piece.x
-            Move.y = piece.y-1
-            ValidMoves[#ValidMoves+1] = Move
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changing = piece.y - i
+                if changing >= 1 and changing <= 8 then
+                    local move = {x=piece.x,y=changing}
+                    table.insert(ValidMoves, move)
+                end
+            end
         end
-    elseif piece.pieceName == "king" then
-        for key, value in pairs(Layout) do
-            if piece.x+1 == value.x and piece.y == value.y and piece.color ~= value.color then
-                
-                local Move = {}
-                Move.x = piece.x+1
-                Move.y = piece.y
-                ValidMoves[#ValidMoves+1] = Move
-            
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x+7 and value.y == piece.y+7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x+6 and value.y == piece.y+6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x+5 and value.y == piece.y+5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x+4 and value.y == piece.y+4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x+3 and value.y == piece.y+3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x+2 and value.y == piece.y+2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x+1 and value.y == piece.y+1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
             end
-            if piece.x == value.x and piece.y+1 == value.y and piece.color ~= value.color then
-                
-                local Move = {}
-                Move.x = piece.x
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changingX = piece.x + i
+                local changingY = piece.y + i
+                if changingX >= 1 and changingX <= 8 and changingY >= 1 and changingY <= 8 then
+                    local move = {x=changingX,y=changingY}
+                    table.insert(ValidMoves, move)
+                end
             end
-            if piece.x-1 == value.x and piece.y == value.y and piece.color ~= value.color then
-                local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y
-                ValidMoves[#ValidMoves+1] = Move
+        end
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x-7 and value.y == piece.y+7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x-6 and value.y == piece.y+6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x-5 and value.y == piece.y+5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x-4 and value.y == piece.y+4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x-3 and value.y == piece.y+3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x-2 and value.y == piece.y+2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x-1 and value.y == piece.y+1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
             end
-            if piece.x == value.x and piece.y-1 == value.y and piece.color ~= value.color then
-                local Move = {}
-                Move.x = piece.x
-                Move.y = piece.y-1
-                ValidMoves[#ValidMoves+1] = Move
-                
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changingX = piece.x - i
+                local changingY = piece.y + i
+                if changingX >= 1 and changingX <= 8 and changingY >= 1 and changingY <= 8 then
+                    local move = {x=changingX,y=changingY}
+                    table.insert(ValidMoves, move)
+                end
             end
-            if piece.x+1 == value.x and piece.y-1 == value.y and piece.color ~= value.color then
-                local Move = {}
-                Move.x = piece.x+1
-                Move.y = piece.y-1
-                ValidMoves[#ValidMoves+1] = Move
+        end
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x-7 and value.y == piece.y-7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x-6 and value.y == piece.y-6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x-5 and value.y == piece.y-5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x-4 and value.y == piece.y-4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x-3 and value.y == piece.y-3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x-2 and value.y == piece.y-2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x-1 and value.y == piece.y-1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
             end
-            if piece.x-1 == value.x and piece.y-1 == value.y and piece.color ~= value.color then
-                local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y-1
-                ValidMoves[#ValidMoves+1] = Move
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changingX = piece.x - i
+                local changingY = piece.y - i
+                if changingX >= 1 and changingX <= 8 and changingY >= 1 and changingY <= 8 then
+                    local move = {x=changingX,y=changingY}
+                    table.insert(ValidMoves, move)
+                end
             end
-            if piece.x+1 == value.x and piece.y+1 == value.y and piece.color ~= value.color then
-                local Move = {}
-                Move.x = piece.x+1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
+        end
+        local Movespaces = 7
+
+        for index, value in pairs(Layout) do
+            if value.x == piece.x+7 and value.y == piece.y-7 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 7)
+                    else
+                        Movespaces = math.min(Movespaces, 6)
+                    end
+                end
+            elseif value.x == piece.x+6 and value.y == piece.y-6 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 6)
+                    else
+                        Movespaces = math.min(Movespaces, 5)
+                    end
+                end
+            elseif value.x == piece.x+5 and value.y == piece.y-5 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 5)
+                    else
+                        Movespaces = math.min(Movespaces, 4)
+                    end
+                end
+            elseif value.x == piece.x+4 and value.y == piece.y-4 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 4)
+                    else
+                        Movespaces = math.min(Movespaces, 3)
+                    end
+                end
+            elseif value.x == piece.x+3 and value.y == piece.y-3 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 3)
+                    else
+                        Movespaces = math.min(Movespaces, 2)
+                    end
+                end
+            elseif value.x == piece.x+2 and value.y == piece.y-2 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 2)
+                    else
+                        Movespaces = math.min(Movespaces, 1)
+                    end
+                end
+            elseif value.x == piece.x+1 and value.y == piece.y-1 then
+                if value.pieceName ~= "none" then
+                    if piece.color ~= value.color then
+                        Movespaces = math.min(Movespaces, 1)
+                    else
+                        Movespaces = math.min(Movespaces, 0)
+                    end
+                end
             end
-            if piece.x-1 == value.x and piece.y+1 == value.y and piece.color ~= value.color then
-                local Move = {}
-                Move.x = piece.x-1
-                Move.y = piece.y+1
-                ValidMoves[#ValidMoves+1] = Move
+        end
+        if Movespaces >= 1 then
+            for i=1, Movespaces do
+                local changingX = piece.x + i
+                local changingY = piece.y - i
+                if changingX >= 1 and changingX <= 8 and changingY >= 1 and changingY <= 8 then
+                    local move = {x=changingX,y=changingY}
+                    table.insert(ValidMoves, move)
+                end
             end
         end
     end
